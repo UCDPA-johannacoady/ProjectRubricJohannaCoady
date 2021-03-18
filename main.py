@@ -12059,7 +12059,7 @@ custdata_clean_inc = custdata_clean[custdata_clean["Price"] > 0]
 
 # % unique customers
 custdata_clean_inc['Customer ID'].nunique()
-custdata_clean_inc['Customer ID'].nunique() / custdata_clean_inc['Customer ID'].count()
+pie=custdata_clean_inc['Customer ID'].nunique() / custdata_clean_inc['Customer ID'].count()
 
 inc_in_Jan = price_date[price_date['Purchase Date'].dt.month == 0o1]
 inc_in_Jan["Price"].sum()
@@ -12097,15 +12097,96 @@ inc_in_Nov["Price"].sum()
 inc_in_Dec = price_date[price_date['Purchase Date'].dt.month == 12]
 inc_in_Dec["Price"].sum()
 
-inc_by_month = {"Jan" : 8397,
-                "Feb" : 8041,
-                "Mar" : 8890,
-                "Apr" : 8065,
-                "May" : 8735,
-                "Jun" : 8865,
-                "Jul" : 9045,
-                "Aug" : 8046,
-                "Sep" : 7657,
-                "Oct" : 8800,
-                "Nov" : 9219,
-                "Dec" : 7705}
+inc_by_month = {"Month" : ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+                "Sales" : [8397, 8041, 8890, 8065, 8735, 8865, 9045, 8046, 7657, 8800, 9219, 7705]}
+
+# visualisations
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
+# Catplots categories of products x sales quantities
+g= sns.catplot (x="Product Description", data = custdata_clean_inc, kind = "count")
+plt.xticks(rotation=90)
+g.fig.tight_layout()
+g.fig.suptitle("Sales by Product Description")
+g.set(ylabel="Sales")
+
+c = sns.catplot (x="Product Type", data = custdata_clean_inc, kind = "count",)
+plt.xticks(rotation=90)
+c.fig.tight_layout()
+c.fig.suptitle("Sales by Product Type")
+c.set(ylabel="Sales")
+
+# relplots - line plot of sales over time by month
+# create pandas df from inc by month dictionary
+Sales_by_month_df = pd.DataFrame(inc_by_month)
+sns.set_style("whitegrid")
+M = sns.relplot(x="Month", y="Sales", data= Sales_by_month_df, kind="line", ci=None)
+M.fig.suptitle("Sales over year")
+M.fig.tight_layout()
+
+Sales_by_month_df = pd.DataFrame(inc_by_month)
+sns.set_style("whitegrid")
+S = sns.relplot(x="Month", y="Sales", data= Sales_by_month_df, kind="line", ci=None)
+S.set(ylim=(0, 10000))
+S.fig.suptitle("Sales over year")
+S.fig.tight_layout()
+
+# returns value
+total_revenue=custdata_clean["Price"].sum()
+total_sales=custdata_clean_inc["Price"].sum()
+Returns_value=total_sales - total_revenue
+print(Returns_value)
+
+# price(sales) by day of week
+D = sns.catplot(x="Day", y="Price", data=custdata_clean_inc, kind="box", order=["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"])
+
+# country, marketing permissions
+CM = sns.catplot(x = "Country", kind = "count", data=custdata_clean_inc, hue="Marketing Opt In")
+CM_sub = sns.catplot(x = "Country", kind = "count", data=custdata_clean_inc, col="Marketing Opt In")
+
+
+#Pie chart of unique v returning customers
+custdata_clean_inc['Customer ID'].nunique()
+unique=custdata_clean_inc['Customer ID'].nunique() / custdata_clean_inc['Customer ID'].count()
+returning=1-unique
+
+labels = "Unique", "Returning"
+sizes = [74.79296066252588, 25.207039337474124]
+fig1, ax1 = plt.subplots()
+ax1.pie(sizes, labels=labels, autopct='%1.1f%%',
+        shadow=True, startangle=90)
+ax1.axis('equal')
+plt.show()
+
+custdata_clean_inc.info()
+
+Price_Day = custdata_clean_inc[["Price", "Day"]]
+Price_Day.head()
+
+sns.relplot(x="Day", y="Price", data=custdata_clean_inc, kind="scatter")
+
+# Defining reusable function to get quarterly sales
+def sum_sales (a, b, c):
+    sum = a+b+c
+    return sum
+
+Q1 = sum_sales(8397, 8041, 8890)
+print(Q1)
+Q2 = sum_sales(8065, 8735, 8865)
+print(Q2)
+Q3 = sum_sales(9045, 8046, 7657)
+print(Q3)
+Q4 = sum_sales(8800, 9219, 7705)
+print(Q4)
+
+# For Loop / Iterrows
+
+for "Product Description" in custdata_clean_inc.iterrows("Product Description"):
+    if "men's" in somestring:
+        print ("male item")
+    elif "women's" in somestring:
+        print ("female item")
+    else:
+        print ("unisex")
