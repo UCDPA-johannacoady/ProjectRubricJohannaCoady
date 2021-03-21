@@ -12100,72 +12100,11 @@ inc_in_Dec["Price"].sum()
 inc_by_month = {"Month" : ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
                 "Sales" : [8397, 8041, 8890, 8065, 8735, 8865, 9045, 8046, 7657, 8800, 9219, 7705]}
 
-# visualisations
-import matplotlib.pyplot as plt
-import seaborn as sns
-
-
-# Catplots categories of products x sales quantities
-g= sns.catplot (x="Product Description", data = custdata_clean_inc, kind = "count")
-plt.xticks(rotation=90)
-g.fig.tight_layout()
-g.fig.suptitle("Sales by Product Description")
-g.set(ylabel="Sales")
-
-c = sns.catplot (x="Product Type", data = custdata_clean_inc, kind = "count",)
-plt.xticks(rotation=90)
-c.fig.tight_layout()
-c.fig.suptitle("Sales by Product Type")
-c.set(ylabel="Sales")
-
-# relplots - line plot of sales over time by month
-# create pandas df from inc by month dictionary
-Sales_by_month_df = pd.DataFrame(inc_by_month)
-sns.set_style("whitegrid")
-M = sns.relplot(x="Month", y="Sales", data= Sales_by_month_df, kind="line", ci=None)
-M.fig.suptitle("Sales over year")
-M.fig.tight_layout()
-
-Sales_by_month_df = pd.DataFrame(inc_by_month)
-sns.set_style("whitegrid")
-S = sns.relplot(x="Month", y="Sales", data= Sales_by_month_df, kind="line", ci=None)
-S.set(ylim=(0, 10000))
-S.fig.suptitle("Sales over year")
-S.fig.tight_layout()
-
 # returns value
 total_revenue=custdata_clean["Price"].sum()
 total_sales=custdata_clean_inc["Price"].sum()
 Returns_value=total_sales - total_revenue
 print(Returns_value)
-
-# price(sales) by day of week
-D = sns.catplot(x="Day", y="Price", data=custdata_clean_inc, kind="box", order=["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"])
-
-# country, marketing permissions
-CM = sns.catplot(x = "Country", kind = "count", data=custdata_clean_inc, hue="Marketing Opt In")
-CM_sub = sns.catplot(x = "Country", kind = "count", data=custdata_clean_inc, col="Marketing Opt In")
-
-
-#Pie chart of unique v returning customers
-custdata_clean_inc['Customer ID'].nunique()
-unique=custdata_clean_inc['Customer ID'].nunique() / custdata_clean_inc['Customer ID'].count()
-returning=1-unique
-
-labels = "Unique", "Returning"
-sizes = [74.79296066252588, 25.207039337474124]
-fig1, ax1 = plt.subplots()
-ax1.pie(sizes, labels=labels, autopct='%1.1f%%',
-        shadow=True, startangle=90)
-ax1.axis('equal')
-plt.show()
-
-custdata_clean_inc.info()
-
-Price_Day = custdata_clean_inc[["Price", "Day"]]
-Price_Day.head()
-
-sns.relplot(x="Day", y="Price", data=custdata_clean_inc, kind="scatter")
 
 # Defining reusable function to get quarterly sales
 def sum_sales (a, b, c):
@@ -12181,12 +12120,103 @@ print(Q3)
 Q4 = sum_sales(8800, 9219, 7705)
 print(Q4)
 
-# For Loop / Iterrows
-
-for "Product Description" in custdata_clean_inc.iterrows("Product Description"):
-    if "men's" in somestring:
-        print ("male item")
-    elif "women's" in somestring:
-        print ("female item")
+#For Loop
+for lab, row in custdata_clean_inc.iterrows():
+    if "men's" in str(row["Product Description"]):
+        custdata_clean_inc.loc[lab, "Gender"] = "gendered"
     else:
-        print ("unisex")
+        custdata_clean_inc.loc[lab, "Gender"] = "non gendered"
+
+custdata_clean_inc.to_csv(r'C:\Users\Johanna\Documents\Johanna\DataAnalytics\custdata_clean_inc.csv')
+
+# visualisations
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+sns.set_palette("PRGn")
+sns.set_style("whitegrid")
+
+# Catplots categories of products x sales quantities
+# Sales volumes by Product Type
+typeorder = ["T-shirt", "Mugs", "Note Books", "Bags"]
+c = sns.catplot(x="Product Type", data = custdata_clean_inc, kind = "count", order = typeorder)
+plt.xticks(rotation=90)
+c.fig.tight_layout()
+c.fig.suptitle("Sales by Product Type")
+c.set(ylabel="Sales qty")
+
+# Sales volumes by Product Type
+sns.set_palette("PRGn")
+sns.set_style("whitegrid")
+descriptionorder = ["Men's Red T-shirt", "Women's Navy T-shirt", "Men's Navy T-shirt", "Women's Red T-shirt", "Spiral Note Book", "Journal", "White Tall Mug", "Green Cup", "Blue Cup", "BackPack", "Totes", "Black Tall Mug"]
+g= sns.catplot (x="Product Description", data = custdata_clean_inc, kind = "count", order=descriptionorder,)
+plt.xticks(rotation=90)
+g.fig.tight_layout()
+g.fig.suptitle("Sales by Product Description")
+g.set(ylabel="Sales qty")
+
+# country, marketing permissions
+sns.set_palette("PRGn")
+sns.set_style("whitegrid")
+CM = sns.catplot(x = "Country", kind = "count", data=custdata_clean_inc, hue="Marketing Opt In", hue_order=[1,0])
+plt.xticks(rotation=90)
+CM.fig.tight_layout()
+CM.fig.suptitle("Marketing Permission by Country, 1=Yes 0=No")
+CM.set(ylabel="Customer marketing permissions")
+
+#Pie chart of unique v returning customers
+custdata_clean_inc['Customer ID'].nunique()
+unique=custdata_clean_inc['Customer ID'].nunique() / custdata_clean_inc['Customer ID'].count()
+multiproduct=1-unique
+labels = "Unique", "Multi-product"
+colors = ["orchid", "lavender"]
+sizes = [74.79296066252588, 25.207039337474124]
+fig1, ax1 = plt.subplots()
+ax1.pie(sizes, labels=labels, autopct='%1.1f%%',
+        shadow=True, startangle=90, colors=colors)
+ax1.axis('equal')
+plt.title("Unique v multi-product customers")
+plt.show()
+
+custdata_clean_inc.to_csv(r'C:\Users\Johanna\Documents\Johanna\DataAnalytics\custdata_clean_inc.csv')
+
+# returning customers i.e. multi transactions
+multiproduct_cust = pd.read_csv("C:\\Users\\Johanna\\Documents\\multi_product_customers.csv")
+multiproduct_cust['Order Number'].nunique()
+returning=multiproduct_cust['Order Number'].nunique() / multiproduct_cust['Order Number'].count()
+multiproduct=1-returning
+labels2 = "Multi-product", "Returning"
+colors = ["lavender", "silver"]
+sizes = [60.61250531688643, 39.387494683113566]
+fig1, ax1 = plt.subplots()
+ax1.pie(sizes, labels=labels2, autopct='%1.1f%%',
+        shadow=True, startangle=90, colors=colors)
+ax1.axis('equal')
+plt.title("Multi-product customers v returning customers")
+plt.show()
+
+# price(sales) by day of week
+D = sns.catplot(x="Day", y="Price", data=custdata_clean_inc, kind="box", order=["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"])
+
+Price_Day = custdata_clean_inc[["Price", "Day"]]
+Price_Day.head()
+
+#Bokeh visualisation
+from bokeh.io import output_file
+from bokeh.io import show
+from bokeh.plotting import figure
+
+x=[1,2,3,4,5,6,7,8,9,10,11,12]
+y=[8397, 8041, 8890, 8065, 8735, 8865, 9045, 8046, 7657, 8800, 9219, 7705]
+a=figure()
+a.line(x,y,line_width=2, color="purple")
+a.circle(x,y,fill_color="white", size=10, nonselection_fill_alpha = 0.2, nonselection_fill_color="gray")
+
+output_file("Sales_by_month_of_year_simplified.html")
+show(a)
+
+#Geospatial analysis
+primary_schools_df = pd.read_csv("C:\\Users\\Johanna\\Documents\\primary_schools_2013_2014.csv")
+print(primary_schools_df.head())
+sns.set_palette("PRGn")
+sns.scatterplot(data=primary_schools_df, x="Long", y="Lat", hue="Ethos")
